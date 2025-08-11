@@ -1,10 +1,10 @@
 # 工作流程名稱
 name: Auto Build & Deploy Vite App to GitHub Pages
-# 觸發時機：該流程建立在main分支底下，故每次被更動的時候會觸發執行，第一階段Build會檢查存儲倉裡面的檔案進行更新替換的動作；第二階段Deploy，會針對我們指定的dist資料夾在更新完畢後重新部署到gh-pages分支。
+# 觸發時機：該流程建立在master分支底下，故每次被更動的時候會觸發執行，第一階段Build會檢查存儲倉裡面的檔案進行更新替換的動作；第二階段Deploy，會針對我們指定的dist資料夾在更新完畢後重新部署到gh-pages分支。
 on:
   push:
     branches:
-      - master	# 限制當推送到 master 分支時才會觸發以下workflow，注意，要確定分支名稱是master或是main
+      - master	# 限制當推送到 master 分支時才會觸發以下workflow，注意，要確定分支名稱是master或是master
 # 處理的工作：工作流程拆成Build和Deploy兩個 job階段，好處是建置與部署分離，可以在不同環境部署，或重複利用同一份建置成果。
 jobs:
   # 第一階段的工作：build 階段負責編譯專案，並用 actions/upload-artifact 把 dist 上傳成暫存檔（artifact）。
@@ -24,6 +24,9 @@ jobs:
 
       - name: Install dependencies
         uses: bahmutov/npm-install@v1 #用這個 Action 安裝套件，它會自動判斷 npm ci 或 npm install，並支援快取。
+
+      - name: Build Vite app
+        run: npm run build
 
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v4
