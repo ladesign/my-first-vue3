@@ -1,6 +1,6 @@
 # 工作流程名稱
 name: Deploy Vite App to GitHub Pages
-# 觸發時機：當main分支被push的時候
+# 觸發時機：該流程建立在main分支底下，故每次被更動的時候會觸發執行，第一階段Build會檢查存儲倉裡面的檔案進行更新替換的動作；第二階段Deploy，會針對我們指定的dist資料夾在更新完畢後重新部署到gh-pages分支。
 on:
   push:
     branches:
