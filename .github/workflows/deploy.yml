@@ -1,58 +1,32 @@
-# 工作流程名稱
 name: Deploy Vite App to GitHub Pages
-# 觸發時機：該流程建立在main分支底下，故每次被更動的時候會觸發執行，第一階段Build會檢查存儲倉裡面的檔案進行更新替換的動作；第二階段Deploy，會針對我們指定的dist資料夾在更新完畢後重新部署到gh-pages分支。
+
 on:
   push:
     branches:
-      - main	# 限制當推送到 main 分支時才會觸發以下workflow
-# 處理的工作：工作流程拆成Build和Deploy兩個 job階段，好處是建置與部署分離，可以在不同環境部署，或重複利用同一份建置成果。
+      - main  # 當推送到 main 分支時觸發
+
 jobs:
-  # 第一階段的工作：build 階段負責編譯專案，並用 actions/upload-artifact 把 dist 上傳成暫存檔（artifact）。
-  build:
-    name: Build
-    # 在ubuntu-latest虛擬環境上執行
+  build-and-deploy:
     runs-on: ubuntu-latest
-    # 定義工作步驟
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
-        uses: bahmutov/npm-install@v1 #用這個 Action 安裝套件，它會自動判斷 npm ci 或 npm install，並支援快取。
+        run: npm ci
 
-      - name: Upload production-ready build files
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-files
-          path: ./dist
-  # 第二階段的工作：deploy 階段下載這個 artifact，再用 peaceiris/actions-gh-pages 部署到 gh-pages。
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-latest
-    # 再次確保只有推送到 main 分支時才會觸發以下workflow
-    if: github.ref == 'refs/heads/main' 
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: production-files
-          path: ./dist
+      - name: Build project
+        run: npm run build
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        # If you're changing the branch from main,
-        # also change the `main` in `refs/heads/main`
-        # below accordingly.
-        # 再次確保只有推送到 main 分支時才會觸發以下workflow
-        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          # 這裡的金鑰使用公開金鑰，須小心安全性的問題
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
