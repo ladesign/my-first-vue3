@@ -25,9 +25,11 @@ jobs:
       - name: Install dependencies
         uses: bahmutov/npm-install@v1 #用這個 Action 安裝套件，它會自動判斷 npm ci 或 npm install，並支援快取。
 
+      # 要先 build，dist才會存在，若無此步驟，第二階段的deploy會導致部署的 gh-pages 分支沒有 vite 打包後的檔案，網頁一打開就會找不到 /src/main.js。
       - name: Build Vite app
         run: npm run build
 
+      # 上傳打包文件至 ./dist，第二階段的deploy才能將 vite 打包後的檔案部署至 gh-pages 分支
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v4
         with:
